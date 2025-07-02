@@ -7,10 +7,14 @@ router.get("/", (req, res) => {
     console.log("Hello World");
     console.log(req.body, "body");
     // get video id from request
-    const videoId = req.query.videoId;
-    if (!videoId) {
+    let videoUrl = req.query.videoUrl;
+    // parse url to get video id
+
+    if (!videoUrl) {
         return res.status(400).json({ error: "Video ID is required" });
     }
+    const videoId = videoUrl.split("v=")[1];
+
     return axios({
             method: "get",
             url: "https://www.googleapis.com/youtube/v3/commentThreads",
@@ -26,11 +30,14 @@ router.get("/", (req, res) => {
             console.log(response.data);
 
             let comments = response.data.items.map((item) => {
-                return item.snippet.topLevelComment.snippet.textDisplay;
+                return {
+                    text: item.snippet.topLevelComment.snippet.textDisplay,
+                    likes: item.snippet.topLevelComment.snippet.likeCount,
+                };
             });
             let nextPageToken = response.data.nextPageToken;
 
-            while (comments.length < 1000) {
+            while (comments.length < 10000) {
                 console.log(comments.length);
                 await axios({
                     method: "get",
@@ -46,14 +53,21 @@ router.get("/", (req, res) => {
                     console.log(response.data);
                     nextPageToken = response.data.nextPageToken;
                     const nextComments = response.data.items.map((item) => {
-                        return item.snippet.topLevelComment.snippet.textDisplay;
+                        return {
+                            text: item.snippet.topLevelComment.snippet.textDisplay,
+                            likes: item.snippet.topLevelComment.snippet.likeCount,
+                        };
                     });
                     comments = comments.concat(nextComments);
                 });
             }
             console.log(comments.length);
+            comments.sort((a, b) => b.likes - a.likes);
+            // get top 100 comments
+            const topComments = comments.slice(0, 100);
+            const topCommentsText = topComments.map((comment) => comment.text);
             // send to ai
-            const aiSummary = await generateCommentsSummary(comments);
+            const aiSummary = await generateCommentsSummary(topCommentsText);
             console.log(aiSummary, "ai summary");
             res.json({
                 aiSummary: aiSummary,
