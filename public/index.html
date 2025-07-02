@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>YouTube Comment Summary</title>
+</head>
+
+<body>
+    <h1>YouTube Comment Summarizer</h1>
+    <form action="/comments" method="POST">
+        <label for="videoUrl">YouTube Video URL:</label>
+        <input type="text" id="videoUrl" name="videoUrl" required />
+        <button type="submit">Generate Summary</button>
+    </form>
+
+    <div id="summary">
+        <!-- summary will appear here after form is submitted -->
+    </div>
+</body>
+
+</html>
