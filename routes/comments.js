@@ -4,8 +4,6 @@ const axios = require("axios");
 const fs = require("fs");
 const { generateCommentsSummary } = require("../services/openai");
 router.get("/", (req, res) => {
-    console.log("Hello World");
-    console.log(req.body, "body");
     // get video id from request
     let videoUrl = req.query.videoUrl;
     // parse url to get video id
@@ -14,7 +12,7 @@ router.get("/", (req, res) => {
         return res.status(400).json({ error: "Video ID is required" });
     }
     const videoId = videoUrl.split("v=")[1];
-
+    console.log(videoId, "videoId");
     return axios({
             method: "get",
             url: "https://www.googleapis.com/youtube/v3/commentThreads",
@@ -44,9 +42,9 @@ router.get("/", (req, res) => {
                     url: "https://www.googleapis.com/youtube/v3/commentThreads",
                     params: {
                         part: "snippet",
-                        videoId: "gnEomCyqrjQ",
+                        videoId: videoId,
                         key: "AIzaSyDo-fa_R-wT47u92A1Sbr7bUTimUOe046k",
-                        maxResults: 10000,
+                        maxResults: 100,
                         pageToken: nextPageToken,
                     },
                 }).then(function(response) {
